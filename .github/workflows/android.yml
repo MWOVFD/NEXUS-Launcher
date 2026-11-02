@@ -56,7 +56,7 @@ jobs:
         working-directory: amethyst
         run: gradle :app_pojavlauncher:assembleDebug
 
-          - name: Find APK
+      - name: Find APK
         run: |
           find amethyst -type f -name "*.apk" -print
           mkdir -p artifacts
