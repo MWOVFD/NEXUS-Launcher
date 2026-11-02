@@ -1,3 +1,4 @@
+
 name: NEXUS Android APK Build
 
 on:
@@ -5,50 +6,58 @@ on:
   push:
     branches:
       - main
-    paths:
-      - NEXUSLauncher_Beta_0.6.0_Source.zip
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout source
+      - name: Checkout Amethyst source
         uses: actions/checkout@v4
+        with:
+          repository: AngelAuraMC/Amethyst-Android
+          ref: v3_openjdk
+          path: amethyst
+          submodules: recursive
 
-      - name: Set up JDK
+      - name: Set up JDK 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: '21'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
-      - name: Install Android SDK packages
-        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+      - name: Download JRE 8
+        uses: dawidd6/action-download-artifact@v9
+        with:
+          workflow: build.yml
+          path: amethyst/app_pojavlauncher/src/main/assets/components/jre
+          workflow_conclusion: completed
+          repo: AngelAuraMC/angelauramc-openjdk-build
+          branch: buildjre8
+          name: jre8-pojav
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.9'
+          validate-wrappers: false
+          gradle-version: '9.6.1'
 
-      - name: Extract NEXUS source
+      - name: Prepare source
+        working-directory: amethyst
         run: |
-          mkdir -p source
-          unzip -q NEXUSLauncher_Beta_0.6.0_Source.zip -d source
-          echo "PROJECT_DIR=source/NEXUSLauncher_Beta_0.6.0" >> "$GITHUB_ENV"
-          test -f source/NEXUSLauncher_Beta_0.6.0/settings.gradle.kts
-          test -f source/NEXUSLauncher_Beta_0.6.0/app/build.gradle.kts
+          bash scripts/languagelist_updater.sh
+          mkdir -p out
 
-      - name: Build APK
-        run: gradle --no-daemon -p "$PROJECT_DIR" assembleDebug
+      - name: Build debug APK
+        working-directory: amethyst
+        run: gradle :app_pojavlauncher:assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: NEXUS-Launcher-debug
-          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
+          name: Amethyst-base-build-test
+          path: amethyst/app_pojavlauncher/build/outputs/apk/debug/*.apk
