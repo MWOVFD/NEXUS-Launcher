@@ -44,7 +44,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
         with:
           validate-wrappers: false
-          gradle-version: '8.14.3'
+          gradle-version: '9.5.0'
 
       - name: Prepare source
         working-directory: amethyst
