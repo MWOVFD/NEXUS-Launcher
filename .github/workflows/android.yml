@@ -1,7 +1,55 @@
+
 name: NEXUS Android APK Build
 
-on: workflow_dispatch: push: branches: [main]
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - NEXUSLauncher_Beta_0.6.0_Source.zip
 
-jobs: build: runs-on: ubuntu-latest
+permissions:
+  contents: read
 
-steps: - name: Checkout source uses: actions/checkout@v4 - name: Set up JDK uses: actions/setup-java@v4 with: distribution: temurin java-version: '17' - name: Set up Android SDK uses: android-actions/setup-android@v3 - name: Set up Gradle uses: gradle/actions/setup-gradle@v4 with: gradle-version: '8.9' - name: Check source files run: | test -f settings.gradle.kts test -f app/build.gradle.kts - name: Build debug APK run: gradle assembleDebug - name: Upload APK uses: actions/upload-artifact@v4 with: name: NEXUS-Launcher-debug path: app/build/outputs/apk/debug/*.apk 
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+
+      - name: Extract NEXUS source
+        run: |
+          mkdir -p source
+          unzip -q NEXUSLauncher_Beta_0.6.0_Source.zip -d source
+          echo "PROJECT_DIR=source/NEXUSLauncher_Beta_0.6.0" >> "$GITHUB_ENV"
+          test -f source/NEXUSLauncher_Beta_0.6.0/settings.gradle.kts
+          test -f source/NEXUSLauncher_Beta_0.6.0/app/build.gradle.kts
+
+      - name: Build APK
+        run: gradle --no-daemon -p "$PROJECT_DIR" assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEXUS-Launcher-debug
+          path: ${{ env.PROJECT_DIR }}/app/build/outputs/apk/debug/*.apk
