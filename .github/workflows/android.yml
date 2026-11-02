@@ -56,8 +56,16 @@ jobs:
         working-directory: amethyst
         run: gradle :app_pojavlauncher:assembleDebug
 
+          - name: Find APK
+        run: |
+          find amethyst -type f -name "*.apk" -print
+          mkdir -p artifacts
+          find amethyst -type f -name "*.apk" -exec cp {} artifacts/ \;
+          test -n "$(find artifacts -type f -name "*.apk" -print -quit)"
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: Amethyst-base-build-test
-          path: amethyst/app_pojavlauncher/build/outputs/apk/debug/*.apk
+          name: NEXUS-Launcher-APK
+          path: artifacts/*.apk
+          if-no-files-found: error
