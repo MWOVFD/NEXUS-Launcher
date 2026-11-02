@@ -54,7 +54,11 @@ jobs:
 
       - name: Build debug APK
         working-directory: amethyst
-        run: gradle :app_pojavlauncher:assembleDebug
+        run: |
+          gradle :app_pojavlauncher:assembleDebug
+          echo "===== APK FILES ====="
+          find . -type f -name "*.apk" -print
+          echo "===== BUILD FINISHED ====="
 
       - name: Find APK
         run: |
