@@ -9,70 +9,34 @@ on:
 
 permissions:
   contents: read
-  actions: read
 
 jobs:
   build:
     runs-on: ubuntu-22.04
 
     steps:
-      - name: Checkout Amethyst source
+      - name: Checkout NEXUS source
         uses: actions/checkout@v4
-        with:
-          repository: AngelAuraMC/Amethyst-Android
-          ref: v3_openjdk
-          path: amethyst
-          submodules: recursive
 
-      - name: Set up JDK 21
+      - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
-
-      - name: Download JRE 8
-        uses: dawidd6/action-download-artifact@v9
-        with:
-          workflow: build.yml
-          path: amethyst/app_pojavlauncher/src/main/assets/components/jre
-          workflow_conclusion: completed
-          repo: AngelAuraMC/angelauramc-openjdk-build
-          branch: buildjre8
-          name: jre8-pojav
+          java-version: '17'
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
-          validate-wrappers: false
-          gradle-version: '9.5.0'
+          gradle-version: '8.9'
 
-      - name: Prepare source
-        working-directory: amethyst
-        run: |
-          bash scripts/languagelist_updater.sh
-          mkdir -p out
-
-      - name: Build debug APK
-        working-directory: amethyst
-        run: |
-          gradle :app_pojavlauncher:assembleDebug
-          echo "===== SEARCHING FOR APK ====="
-          find . -type f -name "*.apk" -print
-
-      - name: Collect APK
-        run: |
-          mkdir -p artifacts
-          find amethyst -type f -name "*.apk" -exec cp {} artifacts/ \;
-          if ! find artifacts -type f -name "*.apk" -print -quit | grep -q ".apk"; then
-            echo "ERROR: APK was not generated!"
-            exit 1
-          fi
-          ls -lh artifacts/
+      - name: Build NEXUS debug APK
+        run: gradle assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: NEXUS-Launcher-APK
-          path: artifacts/*.apk
+          path: app/build/outputs/apk/debug/*.apk
           if-no-files-found: error
           retention-days: 7
+concurrency: 
