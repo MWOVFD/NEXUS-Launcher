@@ -68,14 +68,15 @@ fun NexusHome() {
             .background(NexusBlack)
     ) {
 
-        // 左侧导航栏
-        Column(
-            modifier = Modifier
-                .width(180.dp)
-                .fillMaxHeight()
-                .background(Color(0xFF0D1510))
-                .padding(12.dp)
-        ) {
+// 左侧导航栏
+Column(
+    modifier = Modifier
+        .width(180.dp)
+        .fillMaxHeight()
+        .background(Color(0xFF0D1510))
+        .padding(12.dp)
+        .verticalScroll(rememberScrollState())
+) {
 
             Text(
                 text = "NEXUS",
