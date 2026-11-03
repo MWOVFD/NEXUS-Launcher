@@ -68,7 +68,7 @@ fun NexusHome() {
             .background(NexusBlack)
     ) {
 
-// 左侧导航栏
+  // 左侧导航栏
 Column(
     modifier = Modifier
         .width(180.dp)
